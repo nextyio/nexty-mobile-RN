@@ -89,7 +89,6 @@ const Drawer = createDrawerNavigator(
             backgroundColor: 'transparent'
         },
         drawerWidth: GLOBALS.wp('100%'),
-        backBehavior: 'initialRoute',
         /** customize drawer*/
         contentComponent: props => <Sidebar {...props} />
     }

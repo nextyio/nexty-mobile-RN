@@ -433,47 +433,39 @@ class FormSend extends Component {
         this.setState({ selected: item.name }, () => this.selectToken(item))
     }
 
-    ButtonSend = () => {
+    ButtonSend() {
         Keyboard.dismiss();
         if (this.state.VisibaleButton == true) {
+
             return;
         }
-        if (this.state.showTouchID && !this.state.VisibaleButton) {
-            getData('TouchID').then(data => {
-                if (data != null) {
-                    let options = {
-                        title: "Nexty wallet", // Android
-                        sensorDescription: Language.t("TouchID.Options.sensorDescription"), // Android
-                        sensorErrorDescription: Language.t("TouchID.Options.sensorErrorDescription"), // Android
-                        cancelText: Language.t("TouchID.Options.cancelText"), // Android
-                        fallbackLabel: "", // iOS (if empty, then label is hidden)
-                    };
-                    var reason = Language.t("TouchID.Options.reason");
+        getData('TouchID').then(data => {
+            if (data != null) {
+                let options = {
+                    title: "Nexty wallet", // Android
+                    sensorDescription: Language.t("TouchID.Options.sensorDescription"), // Android
+                    sensorErrorDescription: Language.t("TouchID.Options.sensorErrorDescription"), // Android
+                    cancelText: Language.t("TouchID.Options.cancelText"), // Android
+                    fallbackLabel: "", // iOS (if empty, then label is hidden)
+                };
+                var reason = Language.t("TouchID.Options.reason");
 
-                    TouchID.authenticate(reason, options)
-                        .then(success => {
-                            try {
-                                var passwordDecrypt = CryptoJS.AES.decrypt(data, cachePwd).toString(CryptoJS.enc.Utf8)
-                                this.setState({ Password: passwordDecrypt }, () => {
-                                    this.doSend()
-                                })
-                            } catch (error) {
-                                console.log(error)
-                            }
+                TouchID.authenticate(reason, options)
+                    .then(success => {
+                        try {
+                            var passwordDecrypt = CryptoJS.AES.decrypt(data, cachePwd).toString(CryptoJS.enc.Utf8)
+                            this.setState({ Password: passwordDecrypt }, () => {
+                                this.doSend()
+                            })
+                        } catch (error) {
+                            console.log(error)
+                        }
 
-                        }).catch(err => {
-                            setTimeout(() => {
-                                this.setState({ dialogSend: true })
-                            }, 350);
-                        })
-                } else {
-                    this.setState({ dialogSend: true })
-                }
-            })
-        } else {
-            this.setState({ dialogSend: true })
-        }
-
+                    })
+            } else {
+                this.setState({ dialogSend: true })
+            }
+        })
     }
 
     getBalance = () => {
