@@ -315,7 +315,7 @@
     },
     "ManageWallet": {
         "Title": "Manage wallet",
-        "AletConfirm": {
+        "AlertConfirm": {
             "title": "Confirm remove wallet",
             "content": "Enter your local passcode to process",
             "placeholderInput": "Wallet local passcode",

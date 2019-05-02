@@ -24,7 +24,7 @@ import { exchangeRate, exchangeRateETH, } from '../../services/rate.service';
 import { Utils } from '../../helper/utils'
 import Dialog from "react-native-dialog";
 import { SendService, SendToken, updateBalance, SV_UpdateBalanceTk } from "../../services/wallet.service";
-import { SendTRON } from '../../services/tron.service'
+import { SendTRON, sendTokenTRON } from '../../services/tron.service'
 import { ScaleDialog } from "../../services/loading.service";
 import { getData } from '../../services/data.service';
 import { Dropdown } from 'react-native-material-dropdown';
@@ -295,36 +295,68 @@ class FormSend extends Component {
                     }
 
                 } else {
-                    SendToken(
-                        this.props.DataToken.network,
-                        this.state.tokenSelected.addressToken,
-                        this.state.addresswallet,
-                        this.props.DataToken.addressWL,
-                        parseFloat(this.state.NTY),
-                        this.state.Password,
-                        this.props.DataToken.PK_WL,
-                        this.state.extraData
-                    )
-                        .then(async data => {
-                            await this.setState(this.resetState)
-                            console.log('send success: ' + data)
-                            await this.setState({ titleDialog: Language.t('Send.SendSuccess.Title'), contentDialog: data })
-                            await this.showScaleAnimationDialog('success', this.state.titleDialog, this.state.contentDialog);
-                        }).catch(async error => {
-                            // await this.setState({ dialogSend: false })
-                            console.log('send error: ' + error)
-                            console.log(error.slice(0, 34))
-                            if (error.slice(0, 34) == "Returned error: known transaction:") {
-                                this.setState({ titleDialog: Language.t('Send.SendSuccess.Title'), contentDialog: "0x" + error.slice(35, error.length) })
-                                return;
-                            }
-                            if (error == 'Returned error: insufficient funds for gas * price + value') {
-                                await this.setState({ titleDialog: Language.t('Send.AlerError.Error'), contentDialog: Language.t('Send.AlerError.NotEnoughToken') })
-                            } else {
-                                await this.setState({ titleDialog: Language.t('Send.AlerError.Error'), contentDialog: error })
-                            }
-                            await this.showScaleAnimationDialog('error', this.state.titleDialog, this.state.contentDialog);
-                        })
+                    if (this.props.network != 'tron') {
+                        SendToken(
+                            this.props.DataToken.network,
+                            this.state.tokenSelected.addressToken,
+                            this.state.addresswallet,
+                            this.props.DataToken.addressWL,
+                            parseFloat(this.state.NTY),
+                            this.state.Password,
+                            this.props.DataToken.PK_WL,
+                            this.state.extraData
+                        )
+                            .then(async data => {
+                                await this.setState(this.resetState)
+                                console.log('send success: ' + data)
+                                await this.setState({ titleDialog: Language.t('Send.SendSuccess.Title'), contentDialog: data })
+                                await this.showScaleAnimationDialog('success', this.state.titleDialog, this.state.contentDialog);
+                            }).catch(async error => {
+                                // await this.setState({ dialogSend: false })
+                                console.log('send error: ' + error)
+                                console.log(error.slice(0, 34))
+                                if (error.slice(0, 34) == "Returned error: known transaction:") {
+                                    this.setState({ titleDialog: Language.t('Send.SendSuccess.Title'), contentDialog: "0x" + error.slice(35, error.length) })
+                                    return;
+                                }
+                                if (error == 'Returned error: insufficient funds for gas * price + value') {
+                                    await this.setState({ titleDialog: Language.t('Send.AlerError.Error'), contentDialog: Language.t('Send.AlerError.NotEnoughToken') })
+                                } else {
+                                    await this.setState({ titleDialog: Language.t('Send.AlerError.Error'), contentDialog: error })
+                                }
+                                await this.showScaleAnimationDialog('error', this.state.titleDialog, this.state.contentDialog);
+                            })
+                    } else {
+                        sendTokenTRON(
+                            this.state.viewSymbol,
+                            this.state.addresswallet,
+                            this.props.DataToken.addressWL,
+                            parseFloat(this.state.NTY),
+                            this.state.Password,
+                            this.props.DataToken.PK_WL,
+                            this.state.extraData
+                        )
+                            .then(async data => {
+                                await this.setState(this.resetState)
+                                console.log('send success: ' + data)
+                                await this.setState({ titleDialog: Language.t('Send.SendSuccess.Title'), contentDialog: data })
+                                await this.showScaleAnimationDialog('success', this.state.titleDialog, this.state.contentDialog);
+                            }).catch(async error => {
+                                // await this.setState({ dialogSend: false })
+                                console.log('send error: ' + error)
+                                console.log(error.slice(0, 34))
+                                if (error.slice(0, 34) == "Returned error: known transaction:") {
+                                    this.setState({ titleDialog: Language.t('Send.SendSuccess.Title'), contentDialog: "0x" + error.slice(35, error.length) })
+                                    return;
+                                }
+                                if (error == 'Returned error: insufficient funds for gas * price + value') {
+                                    await this.setState({ titleDialog: Language.t('Send.AlerError.Error'), contentDialog: Language.t('Send.AlerError.NotEnoughToken') })
+                                } else {
+                                    await this.setState({ titleDialog: Language.t('Send.AlerError.Error'), contentDialog: error })
+                                }
+                                await this.showScaleAnimationDialog('error', this.state.titleDialog, this.state.contentDialog);
+                            })
+                    }
                 }
             }, Platform.OS == 'android' ? 0 : 350);
         })

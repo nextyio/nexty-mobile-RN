@@ -149,6 +149,7 @@ class Dashboard extends Component {
                                     }}
                                     onPress={() => this.props.navigation.navigate('Addtoken', {
                                         payload: {
+                                            addressWL: DataToken.addressWL,
                                             network: this.props.snapToWallet.network,
                                             refreshListToken: this.RefreshListToken
                                         }

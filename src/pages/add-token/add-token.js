@@ -23,6 +23,7 @@ import Gradient from 'react-native-linear-gradient'
 import { CheckExistToken, InsertNewToken } from '../../../realm/walletSchema'
 import Header from '../../components/header';
 import Icon from "react-native-vector-icons/FontAwesome";
+import { getInforTRONToken } from '../../services/tron.service'
 
 
 export default class Addtoken extends Component {
@@ -88,26 +89,46 @@ class FormAddToken extends Component {
         })
     }
 
-    async setValue(val: string, network) {
+    async setValue(val: string, network: string, addressWL: string) {
         this.setState({ addressTK: val });
         if (val.length > 0) {
-            GetInfoToken(val, network).then(async data => {
-                if (data.symbol != null) {
-                    await this.setState({ symbol: data.symbol, decimals: data.decimals, balance: data.balance, ValidToken: false, txtErr: '' }, () => {
-                        this.disableButton()
-                    })
-                }
-                else {
+            if (network != 'tron') {
+                GetInfoToken(val, network, addressWL).then(async data => {
+                    if (data.symbol != null) {
+                        await this.setState({ symbol: data.symbol, decimals: data.decimals, balance: data.balance, ValidToken: false, txtErr: '' }, () => {
+                            this.disableButton()
+                        })
+                    }
+                    else {
+                        await this.setState({ ValidToken: true, txtErr: Language.t('AddToken.ValidToken'), symbol: '' }, () => {
+                            this.disableButton()
+                        })
+                    }
+                }).catch(async err => {
+                    console.log(err);
                     await this.setState({ ValidToken: true, txtErr: Language.t('AddToken.ValidToken'), symbol: '' }, () => {
                         this.disableButton()
                     })
-                }
-            }).catch(async err => {
-                console.log(err);
-                await this.setState({ ValidToken: true, txtErr: Language.t('AddToken.ValidToken'), symbol: '' }, () => {
-                    this.disableButton()
                 })
-            })
+            } else {
+                getInforTRONToken(val, addressWL).then(async data => {
+                    if (data.symbol != null) {
+                        await this.setState({ symbol: data.symbol, decimals: data.decimals, balance: data.balance, ValidToken: false, txtErr: '' }, () => {
+                            this.disableButton()
+                        })
+                    }
+                    else {
+                        await this.setState({ ValidToken: true, txtErr: Language.t('AddToken.ValidToken'), symbol: '' }, () => {
+                            this.disableButton()
+                        })
+                    }
+                }).catch(async err => {
+                    console.log(err);
+                    await this.setState({ ValidToken: true, txtErr: Language.t('AddToken.ValidToken'), symbol: '' }, () => {
+                        this.disableButton()
+                    })
+                })
+            }
         }
     }
 
@@ -154,7 +175,7 @@ class FormAddToken extends Component {
 
 
     render() {
-        const { network } = this.props.navigation.getParam('payload');
+        const { network, addressWL } = this.props.navigation.getParam('payload');
         return (
             <View style={styles.container}>
                 {/* <View style={styles.MainForm}> */}
@@ -168,7 +189,7 @@ class FormAddToken extends Component {
                     <TextInput
                         placeholder={Language.t("AddToken.FormAdd.PlaceholderToken")}
                         value={this.state.addressTK}
-                        onChangeText={(value) => { this.setValue(value, network) }}
+                        onChangeText={(value) => { this.setValue(value, network, addressWL) }}
                         style={styles.TextInput}
                         underlineColorAndroid="transparent"
                     />

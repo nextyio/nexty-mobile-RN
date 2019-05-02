@@ -14,7 +14,7 @@ import bigInt from "big-integer";
 import { getData, setData } from './data.service';
 import Language from '../i18n/i18n';
 import ABI from '../../ABI';
-import { UpdateBalanceTRON, ConvertFromAddressTron, ConvertToAddressTron } from './tron.service'
+import { UpdateBalanceTRON, ConvertFromAddressTron, ConvertToAddressTron, UpdateBalanceTokenTRON } from './tron.service'
 
 const WEB3 = new Web3();
 export var balance: number = 0
@@ -65,21 +65,29 @@ export async function getBalance(address) {
 
 export const SV_UpdateBalanceTk = (addressTK, network, addressWL) => new Promise(async (resolve, reject) => {
     try {
-        WEB3.setProvider(new WEB3.providers.HttpProvider(getProvider(network)))
-        var contract = await new WEB3.eth.Contract(ABI, addressTK);
-        await contract.methods.balanceOf(addressWL).call().then(bal => {
-            if (bal > 0) {
-                contract.methods.decimals().call().then(decimal => {
-                    if (parseFloat(bal / Math.pow(10, decimal)) % 1 == 0) {
-                        resolve(parseFloat(bal / Math.pow(10, decimal)).toLocaleString())
-                    } else {
-                        resolve(parseFloat(bal / Math.pow(10, decimal)).toFixed(2).toLocaleString())
-                    }
-                })
-            } else {
-                resolve(0)
-            }
-        })
+        if (network != 'tron') {
+            WEB3.setProvider(new WEB3.providers.HttpProvider(getProvider(network)))
+            var contract = await new WEB3.eth.Contract(ABI, addressTK);
+            await contract.methods.balanceOf(addressWL).call().then(bal => {
+                if (bal > 0) {
+                    contract.methods.decimals().call().then(decimal => {
+                        if (parseFloat(bal / Math.pow(10, decimal)) % 1 == 0) {
+                            resolve(parseFloat(bal / Math.pow(10, decimal)).toLocaleString())
+                        } else {
+                            resolve(parseFloat(bal / Math.pow(10, decimal)).toFixed(2).toLocaleString())
+                        }
+                    })
+                } else {
+                    resolve(0)
+                }
+            })
+        } else {
+            UpdateBalanceTokenTRON(addressTK, addressWL).then(bal => {
+                console.log(bal)
+                resolve(bal)
+            })
+        }
+
     } catch (error) {
         console.log(error)
         reject(error)
@@ -358,7 +366,7 @@ export async function getAddressFromPK(privateKey) {
         resolve(account.address)
     })
 }
-export function GetInfoToken(TokenAddress, network) {
+export function GetInfoToken(TokenAddress, network, addressWL) {
     return new Promise(async (resolve, reject) => {
         try {
             WEB3.setProvider(new WEB3.providers.HttpProvider(getProvider(network)));
@@ -368,7 +376,7 @@ export function GetInfoToken(TokenAddress, network) {
             console.log(error)
         }
         await forkJoin([
-            ContractABI.methods.balanceOf(Address).call().catch(err => {
+            ContractABI.methods.balanceOf(addressWL).call().catch(err => {
                 return null;
             }),
             ContractABI.methods.symbol().call().catch(err => {
